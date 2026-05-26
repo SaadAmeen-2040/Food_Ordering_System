@@ -57,6 +57,11 @@ if(!isset($_SESSION['admin_id']) && $current_page != 'login.php') {
                     </a>
                 </li>
                 <li>
+                    <a href="messages.php" class="admin-nav-link <?= $current_page == 'messages.php' ? 'active' : '' ?>">
+                        <i class="fa-solid fa-envelope w-20px text-center"></i> Messages
+                    </a>
+                </li>
+                <li>
                     <a href="settings.php" class="admin-nav-link <?= $current_page == 'settings.php' ? 'active' : '' ?>">
                         <i class="fa-solid fa-gear w-20px text-center"></i> Settings
                     </a>

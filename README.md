@@ -14,6 +14,7 @@ This system provides a seamless experience for customers to browse the menu, add
 - **Checkout Process**: Secure and straightforward order placement.
 - **User Dashboard**: Customers can track their order history and view detailed order summaries.
 - **Authentication**: Complete user registration and login system.
+- **AI Chatbot**: Gemini-powered AI assistant available on all pages to help customers with menu recommendations and general queries.
 
 ### 🛡️ Backend (Admin Portal)
 - **Secure Admin Login**: Protected admin routing and session management.
@@ -21,6 +22,7 @@ This system provides a seamless experience for customers to browse the menu, add
 - **Manage Categories**: Add, edit (with image uploads), and delete food categories.
 - **Manage Foods**: Full CRUD (Create, Read, Update, Delete) for menu items with pricing and image uploads.
 - **Order Management**: View incoming orders, customer details, and update order statuses (Ordered, On Delivery, Delivered, Cancelled).
+- **Customer Messages**: Read and manage support messages submitted through the Contact Us form.
 - **Admin Settings**: Securely change admin username and password from within the portal.
 
 ---
@@ -45,6 +47,7 @@ Food_Ordering_System/
 │   ├── foods.php           # Food management
 │   ├── categories.php      # Category management
 │   ├── orders.php          # Order management
+│   ├── messages.php        # Contact messages management
 │   ├── login.php           # Admin login
 │   └── settings.php        # Update admin credentials
 │
@@ -54,6 +57,7 @@ Food_Ordering_System/
 ├── images/                 # All uploaded and static images
 │
 ├── includes/
+│   ├── config.php          # API keys and configuration
 │   ├── db_connect.php      # Database connection & sanitization scripts
 │   ├── header.php          # Frontend header
 │   ├── navbar.php          # Frontend navigation
@@ -68,7 +72,8 @@ Food_Ordering_System/
 ├── checkout.php            # Checkout processing
 ├── login.php               # User login
 ├── register.php            # User registration
-└── dashboard.php           # Customer dashboard
+├── dashboard.php           # Customer dashboard
+└── chatbot_api.php         # Backend API for Gemini integration
 ```
 
 ---
