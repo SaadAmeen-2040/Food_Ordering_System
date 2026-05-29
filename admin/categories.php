@@ -25,12 +25,27 @@ if(isset($_POST['add_category'])) {
 
 // Handle Update Category
 if(isset($_POST['update_category'])) {
-    $id = $_POST['category_id'];
+    $id = intval($_POST['category_id']);
     $title = sanitize_input($_POST['title']);
     $active = sanitize_input($_POST['active']);
     
     // Check if new image uploaded
     if(isset($_FILES['image']['name']) && $_FILES['image']['name'] != "") {
+        // Fetch old image name to delete the file from folder
+        $img_stmt = $conn->prepare("SELECT image_name FROM categories WHERE id = ?");
+        $img_stmt->bind_param("i", $id);
+        $img_stmt->execute();
+        $old_img_res = $img_stmt->get_result()->fetch_assoc();
+        if($old_img_res) {
+            $old_image = $old_img_res['image_name'];
+            if($old_image != "" && $old_image != "placeholder.jpg") {
+                $old_path = "../images/".$old_image;
+                if(file_exists($old_path)) {
+                    unlink($old_path);
+                }
+            }
+        }
+        
         $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $image_name = "Category_".rand(1000, 9999).'.'.$ext;
         $source_path = $_FILES['image']['tmp_name'];
@@ -51,9 +66,47 @@ if(isset($_POST['update_category'])) {
 
 // Handle Delete Category
 if(isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $conn->query("DELETE FROM categories WHERE id = $id");
-    echo "<div class='alert alert-success'>Category deleted.</div>";
+    $id = intval($_GET['delete']);
+    
+    // Fetch image name to delete file from folder
+    $img_stmt = $conn->prepare("SELECT image_name FROM categories WHERE id = ?");
+    $img_stmt->bind_param("i", $id);
+    $img_stmt->execute();
+    $img_res = $img_stmt->get_result()->fetch_assoc();
+    if($img_res) {
+        $image_name = $img_res['image_name'];
+        if($image_name != "" && $image_name != "placeholder.jpg") {
+            $path = "../images/".$image_name;
+            if(file_exists($path)) {
+                unlink($path);
+            }
+        }
+    }
+    
+    // Fetch all foods belonging to this category to delete their image files from folder
+    $foods_stmt = $conn->prepare("SELECT image_name FROM foods WHERE category_id = ?");
+    $foods_stmt->bind_param("i", $id);
+    $foods_stmt->execute();
+    $foods_res = $foods_stmt->get_result();
+    if($foods_res && $foods_res->num_rows > 0) {
+        while($f_row = $foods_res->fetch_assoc()) {
+            $f_image = $f_row['image_name'];
+            if($f_image != "" && $f_image != "placeholder.jpg") {
+                $f_path = "../images/".$f_image;
+                if(file_exists($f_path)) {
+                    unlink($f_path);
+                }
+            }
+        }
+    }
+    
+    $stmt = $conn->prepare("DELETE FROM categories WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    if($stmt->execute()) {
+        echo "<div class='alert alert-success'>Category deleted successfully.</div>";
+    } else {
+        echo "<div class='alert alert-danger'>Failed to delete category.</div>";
+    }
 }
 ?>
 

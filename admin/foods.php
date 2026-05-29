@@ -28,15 +28,30 @@ if(isset($_POST['add_food'])) {
 
 // Handle Update Food
 if(isset($_POST['update_food'])) {
-    $id = $_POST['food_id'];
+    $id = intval($_POST['food_id']);
     $title = sanitize_input($_POST['title']);
     $description = sanitize_input($_POST['description']);
-    $price = $_POST['price'];
-    $category_id = $_POST['category_id'];
+    $price = doubleval($_POST['price']);
+    $category_id = intval($_POST['category_id']);
     $active = sanitize_input($_POST['active']);
     
     // Check if new image uploaded
     if(isset($_FILES['image']['name']) && $_FILES['image']['name'] != "") {
+        // Fetch old image name to delete file from folder
+        $img_stmt = $conn->prepare("SELECT image_name FROM foods WHERE id = ?");
+        $img_stmt->bind_param("i", $id);
+        $img_stmt->execute();
+        $old_img_res = $img_stmt->get_result()->fetch_assoc();
+        if($old_img_res) {
+            $old_image = $old_img_res['image_name'];
+            if($old_image != "" && $old_image != "placeholder.jpg") {
+                $old_path = "../images/".$old_image;
+                if(file_exists($old_path)) {
+                    unlink($old_path);
+                }
+            }
+        }
+        
         $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
         $image_name = "Food_".rand(1000, 9999).'.'.$ext;
         $source_path = $_FILES['image']['tmp_name'];
@@ -57,9 +72,30 @@ if(isset($_POST['update_food'])) {
 
 // Handle Delete Food
 if(isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $conn->query("DELETE FROM foods WHERE id = $id");
-    echo "<div class='alert alert-success'>Food item deleted.</div>";
+    $id = intval($_GET['delete']);
+    
+    // Fetch image name to delete file from folder
+    $img_stmt = $conn->prepare("SELECT image_name FROM foods WHERE id = ?");
+    $img_stmt->bind_param("i", $id);
+    $img_stmt->execute();
+    $img_res = $img_stmt->get_result()->fetch_assoc();
+    if($img_res) {
+        $image_name = $img_res['image_name'];
+        if($image_name != "" && $image_name != "placeholder.jpg") {
+            $path = "../images/".$image_name;
+            if(file_exists($path)) {
+                unlink($path);
+            }
+        }
+    }
+    
+    $stmt = $conn->prepare("DELETE FROM foods WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    if($stmt->execute()) {
+        echo "<div class='alert alert-success'>Food item deleted successfully.</div>";
+    } else {
+        echo "<div class='alert alert-danger'>Failed to delete food item.</div>";
+    }
 }
 ?>
 
